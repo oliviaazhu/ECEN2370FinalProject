@@ -24,6 +24,7 @@ void ApplicationInit(void)
     LCD_Clear(0,LCD_COLOR_WHITE);
 
     initGameFlow();
+    initButton();
 
     #if COMPILE_TOUCH_FUNCTIONS == 1
 	InitializeLCDTouch();
@@ -63,6 +64,10 @@ void LCD_Touch_Polling_Demo(void)
 
 void initGameFlow() {
 	gameFlowInit();
+}
+
+void initButton() {
+	initializeInterruptButton();
 }
 
 void runGameFlow(void) {

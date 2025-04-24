@@ -51,8 +51,11 @@ void playGame();
 
 void switchPlayers();
 
-void isWinner();
+bool isWinner();
+
+bool isTie();
 
 bool gameOver();
+
 
 #endif /* INC_GAMEPLAY_H_ */

@@ -65,8 +65,6 @@ void startingScreen() {
   */
 void gameScreen() {
 	LCD_Clear(0, LCD_COLOR_WHITE);
-	char *dropText = "DROP";
-
 
 	for(int i = ROW_START_PIXEL; i <= LCD_PIXEL_HEIGHT; i += ROW_SPACE) {
 		LCD_Draw_Horizontal_Line(COL_START_PIXEL, i, LCD_PIXEL_WIDTH, LCD_COLOR_BLACK);
@@ -76,11 +74,6 @@ void gameScreen() {
 		LCD_Draw_Vertical_Line(i, ROW_START_PIXEL, LCD_PIXEL_HEIGHT - ROW_START_PIXEL, LCD_COLOR_BLACK);
 	}
 
-	LCD_Draw_Rectange_Fill(85, 20, 68, 20, LCD_COLOR_BLACK);
-	LCD_SetFont(&Font16x24);
-	LCD_SetTextColor(LCD_COLOR_WHITE);
-	LCD_WriteString(95, 20, dropText);
-
 }
 
 void LCD_Start_Screen_Polling(void) {
@@ -89,7 +82,7 @@ void LCD_Start_Screen_Polling(void) {
 		if (returnTouchStateAndLocation(&StaticTouchData) == STMPE811_State_Pressed) {
 			/* Touch valid */
 			printf("\nX: %03d\nY: %03d\n", StaticTouchData.x, StaticTouchData.y);
-			StaticTouchData.y = LCD_PIXEL_HEIGHT - StaticTouchData.y;
+			StaticTouchData.y = LCD_PIXEL_HEIGHT - StaticTouchData.y; // Make macro
 			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, 60, 215, 40) > 0) {
 				printf("One player mode \n");
 				state = GAME_SCREEN;
