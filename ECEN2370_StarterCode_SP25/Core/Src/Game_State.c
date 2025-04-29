@@ -9,6 +9,10 @@
 
 static STMPE811_TouchData StaticTouchData;
 static enum GAME_STAGE state = STARTING_SCREEN;
+static enum GAME_MODE gameMode;
+static enum PLAYER winner;
+static int gameLength = 0;
+
 
 void gameFlowInit() {
 	StaticTouchData.orientation = STMPE811_Orientation_Portrait_2;
@@ -22,10 +26,17 @@ void gameFlow() {
 			LCD_Start_Screen_Polling();
 			break;
 		case GAME_SCREEN:
+			uint32_t start_time = HAL_GetTick();
 			gameScreen();
-			playGame();
+			winner = playGame(gameMode);
+			uint32_t end_time = HAL_GetTick();
+			gameLength = ((end_time - start_time) / 1000) + TIMER_OFFSET;
+			printf("%d\n", gameLength);
+			state = FINAL_SCREEN;
 			break;
 		case FINAL_SCREEN:
+			finalScreen();
+			finalScreenPolling();
 			break;
 		default:
 			break;
@@ -76,6 +87,55 @@ void gameScreen() {
 
 }
 
+void finalScreen() {
+	LCD_Clear(0, LCD_COLOR_BLACK);
+
+	LCD_SetTextColor(LCD_COLOR_WHITE);
+	LCD_SetFont(&Font16x24);
+	char *text = "GAME OVER";
+	LCD_WriteString(65, 70, text);
+
+	char *winText = "";
+
+	if(winner == PLAYER_ONE) {
+		winText = "Red won!";
+	}
+	else if(winner == PLAYER_TWO) {
+		winText = "Yellow won!";
+	}
+	else {
+		winText = "Tie!";
+	}
+
+	LCD_WriteString(50, 100, winText);
+
+	char redWinsString[5];
+	int redWins = getRedScore();
+	snprintf(redWinsString, sizeof(redWinsString), "%d",redWins);
+
+	LCD_SetTextColor(LCD_COLOR_RED);
+	LCD_WriteString(95, 130, &redWinsString);
+
+	char* divider = ":";
+	LCD_SetTextColor(LCD_COLOR_WHITE);
+	LCD_WriteString(120, 130, divider);
+
+	char yellowWinsString[5];
+	int yellowWins = getYellowScore();
+	snprintf(yellowWinsString, sizeof(yellowWinsString), "%d", yellowWins);
+
+	LCD_SetTextColor(LCD_COLOR_YELLOW);
+	LCD_WriteString(145, 130, &yellowWinsString);
+
+
+	LCD_Draw_Rectange_Fill(15, 160, 215, 40, LCD_COLOR_WHITE);
+	char *playAgainText = "Play Again";
+	LCD_SetTextColor(LCD_COLOR_BLACK);
+	LCD_WriteString(55, 170, playAgainText);
+
+}
+
+
 void LCD_Start_Screen_Polling(void) {
 	while (1) {
 		/* If touch pressed */
@@ -86,12 +146,14 @@ void LCD_Start_Screen_Polling(void) {
 			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, 60, 215, 40) > 0) {
 				printf("One player mode \n");
 				state = GAME_SCREEN;
+				gameMode = SINGLE_PLAYER_MODE;
 				return;
 			}
 
-			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, LCD_PIXEL_HEIGHT - 130, 215, 40) > 0) {
-				printf("TWo player mode \n");
+			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, 130, 215, 40) > 0) {
+				printf("Two player mode \n");
 				state = GAME_SCREEN;
+				gameMode = TWO_PLAYER_MODE;
 				return;
 			}
 		} else {
@@ -100,3 +162,23 @@ void LCD_Start_Screen_Polling(void) {
 		}
 	}
 }
+
+void finalScreenPolling() {
+	while (1) {
+		/* If touch pressed */
+		if (returnTouchStateAndLocation(&StaticTouchData) == STMPE811_State_Pressed) {
+			/* Touch valid */
+			StaticTouchData.y = LCD_PIXEL_HEIGHT - StaticTouchData.y; // Make macro
+			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, 160, 215, 40) > 0) {
+				printf("Play Again \n");
+				state = GAME_SCREEN;
+				return;
+			}
+
+		} else {
+			/* Touch not pressed */
+			// printf("Not Pressed\n\n");
+		}
+	}
+}
+

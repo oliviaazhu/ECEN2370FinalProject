@@ -9,6 +9,7 @@
 #define INC_GAMEPLAY_H_
 
 #include "LCD_Driver.h"
+#include "RNG_Driver.h"
 #include <stdbool.h>
 
 #define NUM_ROWS 6
@@ -29,10 +30,11 @@
 
 enum PLAYER {
 	PLAYER_ONE,
-	PLAYER_TWO
+	PLAYER_TWO,
+	TIE
 };
 
-enum GAME {
+enum GAME_MODE {
 	SINGLE_PLAYER_MODE,
 	TWO_PLAYER_MODE
 };
@@ -47,7 +49,7 @@ void placeCoin();
 
 bool dropCoin();
 
-void playGame();
+enum PLAYER playGame(enum GAME_MODE gameMode);
 
 void switchPlayers();
 
@@ -56,6 +58,14 @@ bool isWinner();
 bool isTie();
 
 bool gameOver();
+
+void onePlayerMode();
+
+void twoPlayerMode();
+
+int getRedScore();
+
+int getYellowScore();
 
 
 #endif /* INC_GAMEPLAY_H_ */

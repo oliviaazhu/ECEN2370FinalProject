@@ -11,6 +11,8 @@
 #include "LCD_Driver.h"
 #include "Gameplay.h"
 
+#define TIMER_OFFSET 1
+
 enum GAME_STAGE {
     STARTING_SCREEN,
 	GAME_SCREEN,
@@ -23,9 +25,13 @@ void startingScreen();
 
 void gameScreen();
 
+void finalScreen();
+
 void LCD_Start_Screen_Polling(void);
 
 void gameFlow();
+
+void finalScreenPolling();
 
 
 #endif /* INC_GAME_STATE_H_ */

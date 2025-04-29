@@ -12,6 +12,7 @@ static int COIN_COLUMN = 3;
 static int GAME_BOARD[NUM_ROWS][NUM_COLS];
 static STMPE811_TouchData StaticTouchData;
 static bool DROP_COIN = false;
+static int WIN_COUNTER[3];
 
 void initGame() {
 	for(int i = 0; i < NUM_ROWS; i++) {
@@ -19,6 +20,8 @@ void initGame() {
 			GAME_BOARD[i][j] = EMPTY_SPACE;
 		}
 	}
+
+	RNGInit();
 
 	player = PLAYER_TWO;
 
@@ -53,8 +56,7 @@ void showCoin(int row) {
 }
 
 void placeCoin() {
-//	LCD_Draw_Rectange_Fill(0, 0, 120, 320, LCD_COLOR_BLACK);
-//	LCD_Draw_Rectange_Fill(120, 0, 120, 320, LCD_COLOR_BLUE);
+
 	while(!DROP_COIN) {
 		showCoin(COIN_SELECTION_PHASE);
 		if (returnTouchStateAndLocation(&StaticTouchData) == STMPE811_State_Pressed) {
@@ -81,6 +83,10 @@ void placeCoin() {
 
 		}
 	}
+
+	clearCoin();
+
+	return;
 }
 
 bool dropCoin() {
@@ -92,7 +98,6 @@ bool dropCoin() {
 			if(GAME_BOARD[i][COIN_COLUMN] == EMPTY_SPACE) {
 				GAME_BOARD[i][COIN_COLUMN] = player;
 				showCoin(i);
-				clearCoin();
 				return true;
 			}
 		}
@@ -101,13 +106,53 @@ bool dropCoin() {
 	}
 }
 
-void playGame() {
+enum PLAYER playGame(enum GAME_MODE gameMode) {
 	initGame();
+	if(gameMode == SINGLE_PLAYER_MODE) {
+		onePlayerMode();
+	}
+	else if(gameMode == TWO_PLAYER_MODE) {
+		twoPlayerMode();
+	}
+
+	if(isTie()) {
+		return TIE;
+	}
+
+	return player;
+}
+
+void onePlayerMode() {
 	while(!gameOver()) {
 		switchPlayers();
+		COIN_COLUMN = 3;
+		if(player == PLAYER_TWO) {
+			uint32_t randNum = getRandomNumber();
+			COIN_COLUMN = randNum % NUM_COLS;
+			while(!dropCoin()) {
+				randNum = getRandomNumber();
+				COIN_COLUMN = randNum % NUM_COLS;
+			}
+			HAL_Delay(1000);
+		}
+		else {
+			DROP_COIN = false;
+			placeCoin();
+		}
+	}
+
+	return;
+
+}
+
+void twoPlayerMode() {
+	while(!gameOver()) {
+		switchPlayers();
+		COIN_COLUMN = 3;
 		DROP_COIN = false;
 		placeCoin();
 	}
+
 	return;
 }
 
@@ -154,18 +199,13 @@ bool isWinner() {
 		}
 
 		if(row_count >= 4) {
+			WIN_COUNTER[player]++;
 			return true;
 		}
 
 		// Check col
 		int col_count = 1;
 		int row_var = row - 1;
-
-		// Check above cell
-		while(row_var >= 0 && GAME_BOARD[row_var][col] == player) {
-			col_count++;
-			row_var--;
-		}
 
 		// Check below cell
 		row_var = row + 1;
@@ -175,6 +215,7 @@ bool isWinner() {
 		}
 
 		if(col_count >= 4) {
+			WIN_COUNTER[player]++;
 			return true;
 		}
 
@@ -199,6 +240,7 @@ bool isWinner() {
 		}
 
 		if(diagonal1_count >= 4) {
+			WIN_COUNTER[player]++;
 			return true;
 		}
 
@@ -223,6 +265,7 @@ bool isWinner() {
 		}
 
 		if(diagonal2_count >= 4) {
+			WIN_COUNTER[player]++;
 			return true;
 		}
 
@@ -232,17 +275,26 @@ bool isWinner() {
 }
 
 bool isTie() {
-	for(int i = 0; i < NUM_ROWS; i++) {
-		if(GAME_BOARD[i][NUM_COLS - 1] == -1) {
+	for(int i = 0; i < NUM_COLS; i++) {
+		if(GAME_BOARD[0][i] == -1) {
 			return false;
 		}
 	}
 
+	WIN_COUNTER[TIE]++;
 	return true;
 }
 
 bool gameOver() {
 	return isTie() || isWinner();
+}
+
+int getRedScore() {
+	return WIN_COUNTER[PLAYER_ONE];
+}
+
+int getYellowScore() {
+	return WIN_COUNTER[PLAYER_TWO];
 }
 
 void EXTI0_IRQHandler(void) {
