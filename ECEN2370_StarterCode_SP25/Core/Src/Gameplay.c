@@ -59,29 +59,24 @@ void placeCoin() {
 
 	while(!DROP_COIN) {
 		showCoin(COIN_SELECTION_PHASE);
-		if (returnTouchStateAndLocation(&StaticTouchData) == STMPE811_State_Pressed) {
-			printf("\nX: %03d\nY: %03d\n", StaticTouchData.x, StaticTouchData.y);
-			StaticTouchData.y = LCD_PIXEL_HEIGHT - StaticTouchData.y;
-
-			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 0, 0, 120, 320) > 0) {
+		int yValue = gyroGetY();
+			if(yValue < -THRESHOLD){
 				if(COIN_COLUMN > 0) {
 					clearCoin();
 					COIN_COLUMN--;
+					HAL_Delay(100);
 				}
 			}
-
-			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 120, 0, 120, 320) > 0) {
+			else if(yValue > THRESHOLD){
 				if(COIN_COLUMN < NUM_COLS - 1) {
 					clearCoin();
 					COIN_COLUMN++;
+					HAL_Delay(100);
 				}
 			}
 
-		}
-		else {
-			// printf("Not pressed\n");
+			HAL_Delay(100);
 
-		}
 	}
 
 	clearCoin();
@@ -299,7 +294,9 @@ int getYellowScore() {
 
 void EXTI0_IRQHandler(void) {
 	HAL_NVIC_DisableIRQ(EXTI0_IRQn);
-	DROP_COIN = dropCoin();
+	if(!gameOver()) {
+		DROP_COIN = dropCoin();
+	}
 	__HAL_GPIO_EXTI_CLEAR_FLAG(GPIO_PIN_0);
 	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 }

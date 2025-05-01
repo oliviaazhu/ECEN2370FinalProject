@@ -25,6 +25,7 @@ void ApplicationInit(void)
 
     initGameFlow();
     initButton();
+    initGyro();
 
     #if COMPILE_TOUCH_FUNCTIONS == 1
 	InitializeLCDTouch();
@@ -68,6 +69,10 @@ void initGameFlow() {
 
 void initButton() {
 	initializeInterruptButton();
+}
+
+void initGyro() {
+	gyroInit();
 }
 
 

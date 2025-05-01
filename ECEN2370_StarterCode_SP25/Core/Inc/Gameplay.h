@@ -10,6 +10,7 @@
 
 #include "LCD_Driver.h"
 #include "RNG_Driver.h"
+#include "GyroDriver.h"
 #include <stdbool.h>
 
 #define NUM_ROWS 6

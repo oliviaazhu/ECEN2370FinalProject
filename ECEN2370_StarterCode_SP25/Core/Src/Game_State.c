@@ -5,7 +5,7 @@
  *      Author: olivi
  */
 
-#include <Game_State.h>
+#include "Game_State.h"
 
 static STMPE811_TouchData StaticTouchData;
 static enum GAME_STAGE state = STARTING_SCREEN;
@@ -30,8 +30,7 @@ void gameFlow() {
 			gameScreen();
 			winner = playGame(gameMode);
 			uint32_t end_time = HAL_GetTick();
-			gameLength = ((end_time - start_time) / 1000) + TIMER_OFFSET;
-			printf("%d\n", gameLength);
+			gameLength = ((end_time - start_time) / SECONDS_CONVERSION) + TIMER_OFFSET;
 			state = FINAL_SCREEN;
 			break;
 		case FINAL_SCREEN:
@@ -55,19 +54,22 @@ void startingScreen() {
 	LCD_Clear(0, LCD_COLOR_BLACK);
 	LCD_SetTextColor(LCD_COLOR_WHITE);
 	LCD_SetFont(&Font16x24);
+
 	char *text = "Choose your mode";
 	char *onePlayerModeText = "One Player Mode";
 	char *twoPlayerModeText = "Two Player Mode";
 
-	LCD_WriteString(0, 20, text);
+	// Write 'Choose Mode' text
+	LCD_WriteString(CHOOSE_MODE_X, CHOOSE_MODE_Y, text);
 
 	LCD_SetTextColor(LCD_COLOR_BLACK);
 
-	LCD_Draw_Rectange_Fill(15, 60, 215, 40, LCD_COLOR_WHITE);
-	LCD_WriteString(20, 70, onePlayerModeText);
+	// Draw Player Mode Buttons
+	LCD_Draw_Rectange_Fill(ONE_PLAYER_X, ONE_PLAYER_Y, BUTTON_WIDTH, BUTTON_HEIGHT, LCD_COLOR_WHITE);
+	LCD_WriteString(ONE_PLAYER_TEXT_X, ONE_PLAYER_TEXT_Y, onePlayerModeText);
 
-	LCD_Draw_Rectange_Fill(15, 130, 215, 40, LCD_COLOR_WHITE);
-	LCD_WriteString(20, 140, twoPlayerModeText);
+	LCD_Draw_Rectange_Fill(TWO_PLAYER_X, TWO_PLAYER_Y, BUTTON_WIDTH, BUTTON_HEIGHT, LCD_COLOR_WHITE);
+	LCD_WriteString(TWO_PLAYER_TEXT_X, TWO_PLAYER_TEXT_Y, twoPlayerModeText);
 }
 
 /**
@@ -77,10 +79,12 @@ void startingScreen() {
 void gameScreen() {
 	LCD_Clear(0, LCD_COLOR_WHITE);
 
+	// Draw rows
 	for(int i = ROW_START_PIXEL; i <= LCD_PIXEL_HEIGHT; i += ROW_SPACE) {
 		LCD_Draw_Horizontal_Line(COL_START_PIXEL, i, LCD_PIXEL_WIDTH, LCD_COLOR_BLACK);
 	}
 
+	// Draw columns
 	for(int i = COL_START_PIXEL; i <= LCD_PIXEL_WIDTH; i += COL_SPACE) {
 		LCD_Draw_Vertical_Line(i, ROW_START_PIXEL, LCD_PIXEL_HEIGHT - ROW_START_PIXEL, LCD_COLOR_BLACK);
 	}
@@ -89,12 +93,62 @@ void gameScreen() {
 
 void finalScreen() {
 	LCD_Clear(0, LCD_COLOR_BLACK);
-
 	LCD_SetTextColor(LCD_COLOR_WHITE);
 	LCD_SetFont(&Font16x24);
-	char *text = "GAME OVER";
-	LCD_WriteString(65, 70, text);
 
+	char *text = "GAME OVER";
+	LCD_WriteString(GAME_OVER_X, GAME_OVER_Y, text);
+
+	showWinText();
+
+	showScore();
+
+	showTime();
+
+	// Draw Play Again btton
+	LCD_Draw_Rectange_Fill(PLAY_AGAIN_X, PLAY_AGAIN_Y, BUTTON_WIDTH, BUTTON_HEIGHT, LCD_COLOR_WHITE);
+	char *playAgainText = "Play Again";
+	LCD_SetTextColor(LCD_COLOR_BLACK);
+	LCD_WriteString(PLAY_AGAIN_TEXT_X, PLAY_AGAIN_TEXT_Y, playAgainText);
+
+}
+
+void showScore() {
+	char redWinsString[5];
+	int redWins = getRedScore();
+	snprintf(redWinsString, sizeof(redWinsString), "%d",redWins);
+
+	LCD_SetTextColor(LCD_COLOR_RED);
+	LCD_WriteString(RED_TEXT_X, RED_TEXT_Y, &redWinsString);
+
+	char* divider = ":";
+	LCD_SetTextColor(LCD_COLOR_WHITE);
+	LCD_WriteString(DIVIDER_X, DIVIDER_Y, divider);
+
+	char yellowWinsString[5];
+	int yellowWins = getYellowScore();
+	snprintf(yellowWinsString, sizeof(yellowWinsString), "%d", yellowWins);
+
+	LCD_SetTextColor(LCD_COLOR_YELLOW);
+	LCD_WriteString(YELLOW_TEXT_X, YELLOW_TEXT_Y, &yellowWinsString);
+	return;
+}
+
+void showTime() {
+	char seconds[5]; // magic numbers??
+	char timeToWin[25] = "Time: ";
+	char timeToWinEnd[10] = " seconds";
+	snprintf(seconds, sizeof(seconds), "%d", gameLength);
+
+	strcat(timeToWin, seconds);
+	strcat(timeToWin, timeToWinEnd);
+
+	LCD_SetTextColor(LCD_COLOR_WHITE);
+	LCD_WriteString(TIME_X, TIME_Y, &timeToWin);
+}
+
+void showWinText() {
+	// Select win text
 	char *winText = "";
 
 	if(winner == PLAYER_ONE) {
@@ -107,32 +161,9 @@ void finalScreen() {
 		winText = "Tie!";
 	}
 
-	LCD_WriteString(50, 100, winText);
+	LCD_WriteString(WIN_TEXT_X, WIN_TEXT_Y, winText);
 
-	char redWinsString[5];
-	int redWins = getRedScore();
-	snprintf(redWinsString, sizeof(redWinsString), "%d",redWins);
-
-	LCD_SetTextColor(LCD_COLOR_RED);
-	LCD_WriteString(95, 130, &redWinsString);
-
-	char* divider = ":";
-	LCD_SetTextColor(LCD_COLOR_WHITE);
-	LCD_WriteString(120, 130, divider);
-
-	char yellowWinsString[5];
-	int yellowWins = getYellowScore();
-	snprintf(yellowWinsString, sizeof(yellowWinsString), "%d", yellowWins);
-
-	LCD_SetTextColor(LCD_COLOR_YELLOW);
-	LCD_WriteString(145, 130, &yellowWinsString);
-
-
-	LCD_Draw_Rectange_Fill(15, 160, 215, 40, LCD_COLOR_WHITE);
-	char *playAgainText = "Play Again";
-	LCD_SetTextColor(LCD_COLOR_BLACK);
-	LCD_WriteString(55, 170, playAgainText);
-
+	return;
 }
 
 
@@ -143,22 +174,19 @@ void LCD_Start_Screen_Polling(void) {
 			/* Touch valid */
 			printf("\nX: %03d\nY: %03d\n", StaticTouchData.x, StaticTouchData.y);
 			StaticTouchData.y = LCD_PIXEL_HEIGHT - StaticTouchData.y; // Make macro
-			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, 60, 215, 40) > 0) {
+			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, ONE_PLAYER_X, ONE_PLAYER_Y, BUTTON_WIDTH, BUTTON_HEIGHT) > 0) {
 				printf("One player mode \n");
 				state = GAME_SCREEN;
 				gameMode = SINGLE_PLAYER_MODE;
 				return;
 			}
 
-			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, 130, 215, 40) > 0) {
+			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, TWO_PLAYER_X, TWO_PLAYER_Y, BUTTON_WIDTH, BUTTON_HEIGHT) > 0) {
 				printf("Two player mode \n");
 				state = GAME_SCREEN;
 				gameMode = TWO_PLAYER_MODE;
 				return;
 			}
-		} else {
-			/* Touch not pressed */
-			// printf("Not Pressed\n\n");
 		}
 	}
 }
@@ -169,15 +197,12 @@ void finalScreenPolling() {
 		if (returnTouchStateAndLocation(&StaticTouchData) == STMPE811_State_Pressed) {
 			/* Touch valid */
 			StaticTouchData.y = LCD_PIXEL_HEIGHT - StaticTouchData.y; // Make macro
-			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, 15, 160, 215, 40) > 0) {
+			if(TM_STMPE811_TouchInRectangle(&StaticTouchData, PLAY_AGAIN_X, PLAY_AGAIN_Y, BUTTON_WIDTH, BUTTON_HEIGHT) > 0) {
 				printf("Play Again \n");
 				state = GAME_SCREEN;
 				return;
 			}
 
-		} else {
-			/* Touch not pressed */
-			// printf("Not Pressed\n\n");
 		}
 	}
 }

@@ -13,6 +13,7 @@
 #include "fonts.h"
 #include "stmpe811.h"
 #include <string.h>
+#include <stdio.h>
 
 #define COMPILE_TOUCH_FUNCTIONS COMPILE_TOUCH
 #define TOUCH_INTERRUPT_ENABLED COMPILE_TOUCH_INTERRUPT_SUPPORT

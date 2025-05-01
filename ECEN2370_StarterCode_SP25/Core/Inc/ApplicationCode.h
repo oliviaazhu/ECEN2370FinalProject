@@ -25,6 +25,7 @@ void LCD_Touch_Polling_Demo(void);
 
 void initGameFlow();
 void initButton();
+void initGyro();
 void runGameFlow(void);
 
 #endif /* INC_APPLICATIONCODE_H_ */
