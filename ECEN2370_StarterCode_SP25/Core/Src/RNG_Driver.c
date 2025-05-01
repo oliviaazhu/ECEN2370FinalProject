@@ -14,6 +14,7 @@ void RNGInit() {
 	__HAL_RCC_RNG_CLK_ENABLE();
 	RNG_Handle.Instance = RNG;
 	RNG_Status = HAL_RNG_Init(&RNG_Handle);
+	RNGStatus();
 
 }
 
@@ -24,7 +25,8 @@ void RNGStatus() {
 
 uint32_t getRandomNumber() {
 	uint32_t randomNum;
-	HAL_RNG_GenerateRandomNumber(&RNG_Handle, &randomNum);
+	RNG_Status = HAL_RNG_GenerateRandomNumber(&RNG_Handle, &randomNum);
+	RNGStatus();
 	return randomNum;
 }
 

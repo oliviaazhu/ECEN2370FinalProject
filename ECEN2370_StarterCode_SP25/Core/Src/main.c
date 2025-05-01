@@ -46,10 +46,6 @@ I2C_HandleTypeDef hi2c3;
 
 LTDC_HandleTypeDef hltdc;
 
-RNG_HandleTypeDef hrng;
-
-SPI_HandleTypeDef hspi5;
-
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
@@ -60,9 +56,7 @@ TIM_HandleTypeDef htim2;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_LTDC_Init(void);
-static void MX_RNG_Init(void);
 static void MX_TIM2_Init(void);
-static void MX_SPI5_Init(void);
 static void MX_I2C3_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -103,9 +97,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_LTDC_Init();
-  MX_RNG_Init();
   MX_TIM2_Init();
-  MX_SPI5_Init();
   MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
   ApplicationInit(); // Initializes the LCD functionality
@@ -121,7 +113,37 @@ int main(void)
   {
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
-	  runGameFlow();
+	  enum GAME_STAGE currentStage = getStage();
+
+	  switch(currentStage) {
+		case STARTING_SCREEN:
+			startingScreen();
+			setStage(STARTING_SCREEN_POLLING);
+			break;
+		case STARTING_SCREEN_POLLING:
+			if(pollStartScreen() == true) {
+				setStage(GAME_SCREEN);
+			}
+			break;
+		case GAME_SCREEN:
+			showGameScreen();
+			setStage(PLAY_GAME);
+			break;
+		case PLAY_GAME:
+			runGame(getGameMode());
+			setStage(FINAL_SCREEN);
+			break;
+		case FINAL_SCREEN:
+			showFinalScreen();
+			setStage(FINAL_SCREEN_POLLING);
+			break;
+		case FINAL_SCREEN_POLLING:
+			if(pollFinalScreen() == true){
+				setStage(GAME_SCREEN);
+			}
+		default:
+			break;
+	}
   }
   /* USER CODE END 3 */
 }
@@ -298,70 +320,6 @@ static void MX_LTDC_Init(void)
   /* USER CODE BEGIN LTDC_Init 2 */
 
   /* USER CODE END LTDC_Init 2 */
-
-}
-
-/**
-  * @brief RNG Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_RNG_Init(void)
-{
-
-  /* USER CODE BEGIN RNG_Init 0 */
-
-  /* USER CODE END RNG_Init 0 */
-
-  /* USER CODE BEGIN RNG_Init 1 */
-
-  /* USER CODE END RNG_Init 1 */
-  hrng.Instance = RNG;
-  if (HAL_RNG_Init(&hrng) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN RNG_Init 2 */
-
-  /* USER CODE END RNG_Init 2 */
-
-}
-
-/**
-  * @brief SPI5 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SPI5_Init(void)
-{
-
-  /* USER CODE BEGIN SPI5_Init 0 */
-
-  /* USER CODE END SPI5_Init 0 */
-
-  /* USER CODE BEGIN SPI5_Init 1 */
-
-  /* USER CODE END SPI5_Init 1 */
-  /* SPI5 parameter configuration*/
-  hspi5.Instance = SPI5;
-  hspi5.Init.Mode = SPI_MODE_MASTER;
-  hspi5.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi5.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi5.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi5.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi5.Init.NSS = SPI_NSS_SOFT;
-  hspi5.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi5.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi5.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi5.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi5.Init.CRCPolynomial = 10;
-  if (HAL_SPI_Init(&hspi5) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SPI5_Init 2 */
-
-  /* USER CODE END SPI5_Init 2 */
 
 }
 

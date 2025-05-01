@@ -5,10 +5,10 @@
  *      Author: Xavion
  */
 
-#include "LCD_Driver.h"
+#include "GameScreen.h"
 #include "stm32f4xx_hal.h"
-#include "Game_State.h"
 #include "Button_Driver.h"
+#include "State.h"
 
 #include <stdio.h>
 
@@ -23,9 +23,20 @@ void LCD_Visual_Demo(void);
 void LCD_Touch_Polling_Demo(void);
 #endif // (COMPILE_TOUCH_FUNCTIONS == 1)
 
-void initGameFlow();
 void initButton();
 void initGyro();
-void runGameFlow(void);
+void initRNG();
+
+void showStartingScreen();
+
+void showGameScreen();
+
+bool pollStartScreen();
+
+void runGame(enum GAME_MODE mode);
+
+void showFinalScreen();
+
+bool pollFinalScreen();
 
 #endif /* INC_APPLICATIONCODE_H_ */

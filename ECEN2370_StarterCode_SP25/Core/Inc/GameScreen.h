@@ -5,15 +5,12 @@
  *      Author: olivi
  */
 
-#ifndef INC_GAME_STATE_H_
-#define INC_GAME_STATE_H_
+#ifndef INC_GAMESCREEN_H_
+#define INC_GAMESCREEN_H_
 
-#include "LCD_Driver.h"
 #include "Gameplay.h"
 
-#define TIMER_OFFSET 1
-#define SECONDS_CONVERSION 1000
-
+#define CHOOSE_MODE "Choose your mode"
 #define CHOOSE_MODE_X 0
 #define CHOOSE_MODE_Y 20
 
@@ -23,15 +20,18 @@
 #define ONE_PLAYER_X 15
 #define ONE_PLAYER_Y 60
 
+#define ONE_PLAYER_TEXT "One Player Mode"
 #define ONE_PLAYER_TEXT_X (ONE_PLAYER_X + 5)
 #define ONE_PLAYER_TEXT_Y (ONE_PLAYER_Y + 10)
 
 #define TWO_PLAYER_X 15
 #define TWO_PLAYER_Y 130
 
+#define TWO_PLAYER_TEXT "Two Player Mode"
 #define TWO_PLAYER_TEXT_X (TWO_PLAYER_X + 5)
 #define TWO_PLAYER_TEXT_Y (TWO_PLAYER_Y + 10)
 
+#define GAME_OVER "GAME OVER"
 #define GAME_OVER_X 65
 #define GAME_OVER_Y 70
 
@@ -47,22 +47,24 @@
 #define YELLOW_TEXT_X 145
 #define YELLOW_TEXT_Y 130
 
+#define TIME_MAX_SIZE 25
 #define TIME_X 10
 #define TIME_Y 155
+
+#define SECONDS_MAX_SIZE 10
 
 #define PLAY_AGAIN_X 15
 #define PLAY_AGAIN_Y 180
 
+#define PLAY_AGAIN_TEXT "Play Again"
 #define PLAY_AGAIN_TEXT_X (PLAY_AGAIN_X + 5)
 #define PLAY_AGAIN_TEXT_Y (PLAY_AGAIN_Y + 10)
 
-enum GAME_STAGE {
-    STARTING_SCREEN,
-	GAME_SCREEN,
-	FINAL_SCREEN
-};
+#define MAX_NUMBER_SIZE 5
 
-void gameFlowInit();
+#define RED_WON "Red won!"
+#define YELLOW_WON "Yellow won!"
+#define TIE_WON "Tie!"
 
 void startingScreen();
 
@@ -70,11 +72,9 @@ void gameScreen();
 
 void finalScreen();
 
-void LCD_Start_Screen_Polling(void);
+bool startScreenPolling(STMPE811_TouchData* StaticTouchData);
 
-void gameFlow();
-
-void finalScreenPolling();
+bool finalScreenPolling(STMPE811_TouchData* StaticTouchData);
 
 void showScore();
 
@@ -82,4 +82,6 @@ void showTime();
 
 void showWinText();
 
-#endif /* INC_GAME_STATE_H_ */
+void adjustTouch(STMPE811_TouchData* StaticTouchData);
+
+#endif /* INC_GAMESCREEN_H_ */

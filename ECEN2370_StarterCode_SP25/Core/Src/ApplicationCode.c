@@ -16,6 +16,10 @@ extern void initialise_monitor_handles(void);
 static STMPE811_TouchData StaticTouchData;
 #endif // COMPILE_TOUCH_FUNCTIONS
 
+/**
+  * @brief  This function initializes all parts required for the application
+  * @retval None
+  */
 void ApplicationInit(void)
 {
 	initialise_monitor_handles(); // Allows printf functionality
@@ -23,9 +27,13 @@ void ApplicationInit(void)
     LTCD_Layer_Init(0);
     LCD_Clear(0,LCD_COLOR_WHITE);
 
-    initGameFlow();
+    // Set starting stage
+    setStage(STARTING_SCREEN);
+
+    // Init peripherals
     initButton();
     initGyro();
+    initRNG();
 
     #if COMPILE_TOUCH_FUNCTIONS == 1
 	InitializeLCDTouch();
@@ -39,12 +47,20 @@ void ApplicationInit(void)
 
 }
 
+/**
+  * @brief  This function plays a demo of the screen
+  * @retval None
+  */
 void LCD_Visual_Demo(void)
 {
 	visualDemo();
 }
 
 #if COMPILE_TOUCH_FUNCTIONS == 1
+/**
+  * @brief  This function runs a demo of how the touch functionality works
+  * @retval None
+  */
 void LCD_Touch_Polling_Demo(void)
 {
 	LCD_Clear(0,LCD_COLOR_GREEN);
@@ -63,21 +79,79 @@ void LCD_Touch_Polling_Demo(void)
 }
 #endif // COMPILE_TOUCH_FUNCTIONS
 
-void initGameFlow() {
-	gameFlowInit();
-}
-
+/**
+  * @brief  This function initializes the button
+  * @retval None
+  */
 void initButton() {
 	initializeInterruptButton();
 }
 
+/**
+  * @brief  This function initializes the gyro
+  * @retval None
+  */
 void initGyro() {
 	gyroInit();
 }
 
+/**
+  * @brief  This function initializes the RNG peripheral
+  * @retval None
+  */
+void initRNG() {
+	RNGInit();
+}
 
-void runGameFlow(void) {
-	gameFlow();
+/**
+  * @brief  This function shows the starting screen
+  * @retval None
+  */
+void showStartingScreen() {
+	startingScreen();
 	return;
 }
+
+/**
+  * @brief  This function shows the game screen
+  * @retval None
+  */
+void showGameScreen() {
+	gameScreen();
+	return;
+}
+
+/**
+  * @brief  This function polls for touch on the start screen
+  * @retval bool
+  */
+bool pollStartScreen() {
+	return startScreenPolling(&StaticTouchData);
+}
+
+/**
+  * @brief  This function starts the actual game
+  * @retval None
+  */
+void runGame(enum GAME_MODE mode) {
+	playGame(mode);
+}
+
+/**
+  * @brief  This function shows the final screen
+  * @retval None
+  */
+void showFinalScreen() {
+	finalScreen();
+}
+
+/**
+  * @brief  This function polls for touch on the final screen
+  * @retval bool
+  */
+bool pollFinalScreen() {
+	return finalScreenPolling(&StaticTouchData);
+}
+
+
 

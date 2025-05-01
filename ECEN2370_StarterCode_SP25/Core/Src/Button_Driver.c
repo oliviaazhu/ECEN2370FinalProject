@@ -7,6 +7,10 @@
 
 #include "Button_Driver.h"
 
+/**
+  * @brief  This function initializes the button
+  * @retval None
+  */
 void initializeInterruptButton() {
 	GPIO_InitTypeDef button;
 	button.Pin = BUTTON_PIN_VALUE;

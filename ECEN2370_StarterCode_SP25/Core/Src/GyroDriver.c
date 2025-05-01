@@ -10,6 +10,10 @@
 static HAL_StatusTypeDef HALStatus;
 static SPI_HandleTypeDef hSPI5 = {0};
 
+/**
+  * @brief  This function initializes the gyro
+  * @retval None
+  */
 void gyroInit() {
 
 	__HAL_RCC_GPIOF_CLK_ENABLE();
@@ -74,11 +78,19 @@ void gyroInit() {
 
 }
 
+/**
+  * @brief  This function powers the gyro
+  * @retval None
+  */
 void gyroPower() {
 	gyroWriteRegisters(&hSPI5, CTRL_REG1, GYRO_POWER);
 	return;
 }
 
+/**
+  * @brief  This function gets the Y values for the gyro
+  * @retval int16_t
+  */
 int16_t gyroGetY() {
 	uint8_t lowerY = gyroReadRegisters(&hSPI5, OUT_Y_L);
 	uint8_t higherY = gyroReadRegisters(&hSPI5, OUT_Y_H);
@@ -90,7 +102,10 @@ int16_t gyroGetY() {
 	return fullY;
 }
 
-
+/**
+  * @brief  This function configures the gyro
+  * @retval None
+  */
 void gyroConfigure() {
 	gyroWriteRegisters(&hSPI5, CTRL_REG1, CR1_CONFIGURE);
 	gyroWriteRegisters(&hSPI5, CTRL_REG4, CR4_CONFIGURE);
@@ -98,6 +113,10 @@ void gyroConfigure() {
 	return;
 }
 
+/**
+  * @brief  This function writes to the gyro registers
+  * @retval None
+  */
 void gyroWriteRegisters(SPI_HandleTypeDef* hspi, uint8_t address, uint8_t data) {
 
 	uint8_t command = GYRO_WRITE | address;
@@ -121,6 +140,10 @@ void gyroWriteRegisters(SPI_HandleTypeDef* hspi, uint8_t address, uint8_t data) 
 	return;
 }
 
+/**
+  * @brief  This function reads the gyro's registers
+  * @retval None
+  */
 uint8_t gyroReadRegisters(SPI_HandleTypeDef* hspi, uint8_t address) {
 
 	uint8_t command = GYRO_READ | address;
@@ -144,16 +167,28 @@ uint8_t gyroReadRegisters(SPI_HandleTypeDef* hspi, uint8_t address) {
 
 }
 
+/**
+  * @brief  This function checks the gyro's status
+  * @retval None
+  */
 void gyroSPIStatus() {
 	APPLICATION_ASSERT(HALStatus == HAL_OK);
 	return;
 }
 
+/**
+  * @brief  This function enables communication with the gyro
+  * @retval None
+  */
 void gyroEnableSlave() {
 	HAL_GPIO_WritePin(SPI_NSS_PORT, SPI5_NSS_PIN, GPIO_PIN_RESET);
 	return;
 }
 
+/**
+  * @brief  This function disables communication with the gyro
+  * @retval None
+  */
 void gyroDisableSlave() {
 	HAL_GPIO_WritePin(SPI_NSS_PORT, SPI5_NSS_PIN, GPIO_PIN_SET);
 	return;
